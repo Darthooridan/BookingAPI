@@ -49,6 +49,16 @@
       "phoneNumber": "+15234567894",
       "profilePicture": "https://example.com/images/paulgreen.jpg",
       "aboutMe": "Engineer by profession, passionate about history. Stay in my vintage-themed home and relive the past."
+    },
+    {
+      "id": "b5678977-23ef-0123-4567-8nhgef0123",
+      "username": "LindaPollen",
+      "password": "lPollen",
+      "name": "Linda Pollen",
+      "email": "lindapolen@email.com",
+      "phoneNumber": "+3122234567894",
+      "profilePicture": "https://example.com/images/lindapollen.jpg",
+      "aboutMe": "Teacher by profession, passionate about history. Stay in my vintage apartament and relive the past."
     }
   ]
 }

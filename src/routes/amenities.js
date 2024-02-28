@@ -10,9 +10,12 @@ const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const amenities = await getAmenities();
-    res.json(amenities);
+    const amenities = await getAmenities(res);
+
+    res.status(200).json(amenities);
   } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Internal Server Error" });
     next(error);
   }
 });
@@ -20,12 +23,20 @@ router.get("/", async (req, res, next) => {
 router.post("/", auth, async (req, res, next) => {
   try {
     const { name } = req.body;
+
     const newAmenity = await createAmenity(name);
-    res.status(201).json(newAmenity);
+
+    res.status(201).json({
+      message: "Amenity successfully added",
+      amenity: newAmenity,
+    });
   } catch (error) {
-    next(error);
+    res.status(400).json({
+      message: error.message,
+    });
   }
 });
+
 
 router.get("/:id", async (req, res, next) => {
   try {
@@ -45,12 +56,12 @@ router.get("/:id", async (req, res, next) => {
 router.delete("/:id", auth, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const amenity = await deleteAmenityById(id);
+    const deletedAmenity = await deleteAmenityById(id);
 
-    if (amenity) {
+    if (deletedAmenity) {
       res.status(200).send({
         message: `Amenity with id ${id} successfully deleted`,
-        amenity,
+        amenity: deletedAmenity,
       });
     } else {
       res.status(404).json({
@@ -66,9 +77,10 @@ router.put("/:id", auth, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
-    const amenity = await updateAmenityById(id, { name });
 
-    if (amenity) {
+    const updatedAmenity = await updateAmenityById(id, { name });
+
+    if (updatedAmenity) {
       res.status(200).send({
         message: `Amenity with id ${id} successfully updated`,
       });

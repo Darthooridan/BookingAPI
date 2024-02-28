@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import process from "process";
 
 const login = async (username, password) => {
-  const secretKey = process.env.AUTH_SECRET_KEY || "65cfa8398fbec0fcaf192498";
+  const secretKey = process.env.AUTH_SECRET_KEY || "my-secret-key";
   const prisma = new PrismaClient();
   const user = await prisma.user.findFirst({
     where: { username, password },

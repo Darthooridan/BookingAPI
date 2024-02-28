@@ -10,27 +10,15 @@ const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const users = await getUsers();
-    res.json(users);
-  } catch (error) {
-    next(error);
-  }
-});
+    const { email, username } = req.query;
 
-router.post("/", auth, async (req, res, next) => {
-  try {
-    const { username, password, name, email, phoneNumber, profilePicture } =
-      req.body;
-    const newUser = /* await */ createUser(
-      // ZONDER await createUser.. INCL await geeft error ??
-      username,
-      password,
-      name,
-      email,
-      phoneNumber,
-      profilePicture
+    const users = await getUsers(email, username);
+
+    const usersWithoutPassword = users.map(
+      ({ password, ...userWithoutPassword }) => userWithoutPassword
     );
-    res.status(201).json(newUser);
+
+    res.status(200).json(usersWithoutPassword);
   } catch (error) {
     next(error);
   }
@@ -51,17 +39,45 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+router.post("/", auth, async (req, res, next) => {
+  try {
+    const { username, password, name, email, phoneNumber, profilePicture } = req.body;
+
+    const newUser = await createUser(
+      username, password, name, email, phoneNumber, profilePicture
+    );
+
+    if (newUser) {
+      res.status(201).json({
+        message: `User with id ${newUser.id} successfully added`,
+        user: newUser,
+      });
+    } else {
+      res.status(400).json({
+        message: "User creation error",
+      });
+    }
+  } catch (error) {
+    console.error("User creation error:", error);
+    next(error);
+  }
+});
+
+
 router.delete("/:id", auth, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const user = await deleteUserById(id);
+    const deletedUser = await deleteUserById(id);
 
-    if (user) {
-      res
-        .status(200)
-        .send({ message: `User with id ${id} successfully deleted`, user });
+    if (deletedUser) {
+      res.status(200).send({
+        message: `User with id ${id} successfully deleted`,
+        user: deletedUser,
+      });
     } else {
-      res.status(404).json({ message: `User with id ${id} not found` });
+      res.status(404).json({
+        message: `User with id ${id} not found`,
+      });
     }
   } catch (error) {
     next(error);
@@ -71,24 +87,27 @@ router.delete("/:id", auth, async (req, res, next) => {
 router.put("/:id", auth, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, username, password, phoneNumber, email, profilePicture } =
+    const { name, username, password, email, phoneNumber, profilePicture } =
       req.body;
-    const user = await updateUserById(id, {
+
+    const updatedUser = await updateUserById(id, {
+      id,
       name,
       username,
       password,
-      phoneNumber,
       email,
+      phoneNumber,
       profilePicture,
     });
 
-    if (user) {
+    if (updatedUser) {
       res.status(200).send({
         message: `User with id ${id} successfully updated`,
-        user,
       });
     } else {
-      res.status(404).json({ message: `User with id ${id} not found` });
+      res.status(404).json({
+        message: `User with id ${id} not found`,
+      });
     }
   } catch (error) {
     next(error);

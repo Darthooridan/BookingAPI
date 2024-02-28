@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 const auth = (req, res, next) => {
   const token = req.headers.authorization;
-  const secretKey = process.env.AUTH_SECRET_KEY || "65cfa8398fbec0fcaf192498";
+  const secretKey = process.env.AUTH_SECRET_KEY || "my-secret-key";
 
   if (!token) {
     return res

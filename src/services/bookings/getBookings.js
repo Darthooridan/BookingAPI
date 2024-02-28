@@ -1,10 +1,40 @@
 import { PrismaClient } from "@prisma/client";
 
-const getBookings = async () => {
-  const prisma = new PrismaClient();
-  const bookings = await prisma.booking.findMany();
+const getBookings = async (
+  userId,
+  propertyId,
+  checkinDate,
+  checkoutDate,
+  numberOfGuests,
+  totalPrice,
+  bookingStatus
+) => {
+  let prisma;
+  try {
+    prisma = new PrismaClient();
 
-  return bookings;
+    const prismaFilters = {
+      userId,
+      propertyId,
+      checkinDate,
+      checkoutDate,
+      numberOfGuests,
+      totalPrice,
+      bookingStatus,
+    };
+
+    const bookings = await prisma.booking.findMany({
+      where: prismaFilters,
+    });
+
+    return bookings;
+  } catch (error) {
+    throw new Error(`Error fetching bookings: ${error.message}`);
+  } finally {
+    if (prisma) {
+      await prisma.$disconnect();
+    }
+  }
 };
 
 export default getBookings;

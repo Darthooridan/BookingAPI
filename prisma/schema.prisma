@@ -10,13 +10,70 @@ datasource db {
   url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
   relationMode      = "prisma"
-  
+}
+
+model User {
+  id             String    @id @default(uuid())
+  username       String    @unique
+  password       String
+  name           String
+  email          String
+  phoneNumber    String
+  profilePicture String
+  reviews        Review[]
+  bookings       Booking[]
 }
 
 model Amenity {
   id         String     @id @default(uuid())
   name       String
   properties Property[]
+}
+
+model Host {
+  id             String     @id @default(uuid())
+  username       String     @unique
+  password       String
+  name           String
+  email          String
+  phoneNumber    String
+  profilePicture String
+  aboutMe        String
+  listings       Property[]
+}
+
+model Property {
+  id            String    @id @default(uuid())
+  hostId        String
+  title         String
+  description   String
+  location      String
+  pricePerNight Decimal   @db.Decimal(10, 2)
+  bedroomCount  Int
+  bathRoomCount Int
+  maxGuestCount Int
+  rating        Int
+  reviews       Review[]
+  bookings      Booking[]
+  amenities     Amenity[]
+
+  host Host @relation(fields: [hostId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([hostId])
+}
+
+model Review {
+  id         String @id @default(uuid())
+  userId     String
+  propertyId String
+  rating     Int
+  comment    String
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([propertyId])
 }
 
 model Booking {
@@ -29,76 +86,9 @@ model Booking {
   totalPrice     Int
   bookingStatus  String
 
-  user       User     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  properties Property @relation(fields: [propertyId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([userId])
   @@index([propertyId])
-}
-
-model Host {
-  id             String     @id @default(uuid())
-  username       String     @unique
-  password       String
-  name           String
-  email          String
-  phoneNumber    String
-  profilePicture String?
-  aboutMe        String
-  properties     Property[]
-}
-
-model Property {
-  id            String  @id @default(uuid())
-  title         String
-  description   String
-  location      String
-  pricePerNight Decimal @db.Decimal(10, 2)
-  bedroomCount  Int
-  bathRoomCount Int
-  maxGuestCount Int
-  hostId        String
-  rating        Int
-
-  amenities Amenity[]
-  bookings  Booking[]
-  reviews   Review[]
-
-  host Host @relation(fields: [hostId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-
-  @@index([hostId])
-  @@index([title])
-  @@index([location])
-}
-
-model Review {
-  id         String  @id @default(uuid())
-  userId     String?
-  propertyId String?
-  rating     Int?
-  comment    String?
-
-  user       User?     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  properties Property? @relation(fields: [propertyId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-
-  @@index([userId])
-  @@index([propertyId])
-}
-
-model User {
-  id             String    @id @default(uuid())
-  username       String    @unique
-  password       String
-  name           String
-  email          String
-  phoneNumber    String
-  profilePicture String?
-  bookings       Booking[]
-  reviews        Review[]
-}
-
-enum ItemType {
-  pending
-  confirmed
-  cancelled
 }

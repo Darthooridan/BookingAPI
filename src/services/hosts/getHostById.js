@@ -1,12 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 
-const getHostById = async (id) => {
-  const prisma = new PrismaClient();
-  const host = await prisma.host.findUnique({
-    where: { id },
-  });
+const prisma = new PrismaClient();
 
-  return host;
+const getHostById = async (hostId) => {
+  try {
+    const host = await prisma.host.findUnique({ where: { id: hostId } });
+    return host;
+  } catch (error) {
+    throw new Error(`Error in getHostById service: ${error.message}`);
+  }
 };
 
 export default getHostById;

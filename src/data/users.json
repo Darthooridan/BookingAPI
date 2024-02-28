@@ -44,6 +44,15 @@
       "email": "stevemiller@example.com",
       "phoneNumber": "123-456-7894",
       "profilePicture": "https://example.com/smiller-profile-pic.jpg"
+    },
+    {
+      "id": "e5676901-23f0-1234-5678-9abcdef01234",
+      "username": "PietVanMolen",
+      "password": "password555",
+      "name": "Piet Van Mollen",
+      "email": "piet@vanmolen.nl",
+      "phoneNumber": "123-456-7844",
+      "profilePicture": "https://example.com/vmollen-profile-pic.jpg"
     }
   ]
 }

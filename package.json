@@ -17,7 +17,7 @@
   "author": "MichalPilch",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.9.1",
+    "@prisma/client": "^5.10.2",
     "@sentry/cli": "^2.28.6",
     "@sentry/node": "^7.101.1",
     "@sentry/profiling-node": "^7.101.1",

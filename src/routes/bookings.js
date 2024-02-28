@@ -10,9 +10,14 @@ const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const bookings = await getBookings();
-    res.json(bookings);
+    const { userId } = req.query;
+
+    const bookings = await getBookings(userId);
+
+    res.status(200).json(bookings);
   } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
     next(error);
   }
 });
@@ -28,15 +33,33 @@ router.post("/", auth, async (req, res, next) => {
       totalPrice,
       bookingStatus,
     } = req.body;
-    const newBooking = await createBooking(
+
+    if (
+      !userId ||
+      !propertyId ||
+      !checkinDate ||
+      !checkoutDate ||
+      !numberOfGuests ||
+      !totalPrice ||
+      !bookingStatus
+    ) {
+      return res.status(400).json({
+        message: "Missing required parameters for creating a booking.",
+      });
+    }
+
+    const bookingData = {
       userId,
       propertyId,
       checkinDate,
       checkoutDate,
       numberOfGuests,
       totalPrice,
-      bookingStatus
-    );
+      bookingStatus,
+    };
+
+    const newBooking = await createBooking(bookingData);
+
     res.status(201).json(newBooking);
   } catch (error) {
     next(error);
@@ -61,12 +84,12 @@ router.get("/:id", async (req, res, next) => {
 router.delete("/:id", auth, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const booking = await deleteBookingById(id);
+    const deletedBooking = await deleteBookingById(id);
 
-    if (booking) {
+    if (deletedBooking) {
       res.status(200).send({
         message: `Booking with id ${id} successfully deleted`,
-        booking,
+        booking: deletedBooking,
       });
     } else {
       res.status(404).json({
@@ -78,29 +101,15 @@ router.delete("/:id", auth, async (req, res, next) => {
   }
 });
 
+
 router.put("/:id", auth, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const {
-      userId,
-      propertyId,
-      checkinDate,
-      checkoutDate,
-      numberOfGuests,
-      totalPrice,
-      bookingStatus,
-    } = req.body;
-    const booking = await updateBookingById(id, {
-      userId,
-      propertyId,
-      checkinDate,
-      checkoutDate,
-      numberOfGuests,
-      totalPrice,
-      bookingStatus,
-    });
+    const updatedBookingData = req.body;
 
-    if (booking) {
+    const updatedBooking = await updateBookingById(id, updatedBookingData);
+
+    if (updatedBooking) {
       res.status(200).send({
         message: `Booking with id ${id} successfully updated`,
       });

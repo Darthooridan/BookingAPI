@@ -1,20 +1,36 @@
 import { PrismaClient } from "@prisma/client";
 
-const createReview = async (userId, propertyId, rating, comment) => {
-  const prisma = new PrismaClient(); //
+const prisma = new PrismaClient();
 
-  const newReview = {
-    userId,
-    propertyId,
-    rating,
-    comment,
-  };
+const createReview = async ({ rating, comment, userId, propertyId }) => {
+  try {
+    const reviewData = {
+      comment,
+      userId,
+      propertyId,
+    };
 
-  const review = await prisma.review.create({
-    data: newReview,
-  });
+    if (rating !== undefined) {
+      reviewData.rating = rating;
+    }
 
-  return review;
+    const review = await prisma.review.create({
+      data: reviewData,
+    });
+
+    console.log("Review successfully added");
+    return {
+      message: "Review successfully added",
+      review,
+    };
+  } catch (error) {
+    console.error(`Review creation error: ${error.message}`);
+    return {
+      error: error.message,
+    };
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default createReview;

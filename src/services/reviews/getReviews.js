@@ -1,10 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 
-const getReviews = async () => {
-  const prisma = new PrismaClient();
-  const reviews = await prisma.review.findMany();
+const prisma = new PrismaClient();
 
-  return reviews;
+const getReviews = async () => {
+  try {
+    const reviews = await prisma.review.findMany();
+    return reviews;
+  } catch (error) {
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default getReviews;

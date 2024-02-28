@@ -1,12 +1,18 @@
 import { PrismaClient } from "@prisma/client";
 
-const getUserById = async (id) => {
-  const prisma = new PrismaClient();
-  const user = await prisma.user.findUnique({
-    where: { id },
-  });
+const prisma = new PrismaClient();
 
-  return user;
+const getUserById = async (id) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+    return user;
+  } catch (error) {
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default getUserById;

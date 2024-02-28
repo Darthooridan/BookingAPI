@@ -1,12 +1,20 @@
 import { PrismaClient } from "@prisma/client";
 
-const deleteBookingById = async (id) => {
-  const prisma = new PrismaClient();
-  const booking = await prisma.booking.deleteMany({
-    where: { id },
-  });
+const prisma = new PrismaClient();
 
-  return booking.count > 0 ? id : null;
+const deleteBookingById = async (bookingId) => {
+  try {
+    const deletedBooking = await prisma.booking.delete({ where: { id: bookingId } });
+    return deletedBooking;
+  } catch (error) {
+    if (error instanceof Error && error.code === "P2025") {
+      return null; 
+    } else {
+      throw new Error(`Error in deleting booking: ${error.message}`);
+    }
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default deleteBookingById;

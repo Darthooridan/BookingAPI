@@ -10,9 +10,8 @@ const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const reviews = await getReviews();
-
-    res.json(reviews);
+    const reviews = await getReviews(res);
+    res.status(200).json(reviews);
   } catch (error) {
     next(error);
   }
@@ -20,16 +19,27 @@ router.get("/", async (req, res, next) => {
 
 router.post("/", auth, async (req, res, next) => {
   try {
-    const { userId, propertyId, rating, comment } = req.body;
-    const newReview =  createReview(
-    
+    const { rating, comment, userId, propertyId } = req.body;
+
+    const newReview = await createReview({
+      rating,
+      comment,
       userId,
       propertyId,
-      rating,
-      comment
-    );
-    res.status(201).json(newReview);
+    });
+
+    if (newReview.error) {
+      res.status(400).json({
+        message: newReview.error,
+      });
+    } else {
+      res.status(201).json({
+        message: "Review successfully added",
+        review: newReview,
+      });
+    }
   } catch (error) {
+    console.error(error);
     next(error);
   }
 });
@@ -52,14 +62,17 @@ router.get("/:id", async (req, res, next) => {
 router.delete("/:id", auth, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const review = await deleteReviewById(id);
+    const deletedReview = await deleteReviewById(id);
 
-    if (review) {
-      res
-        .status(200)
-        .send({ message: `Review with id ${id} successfully deleted`, review });
+    if (deletedReview) {
+      res.status(200).send({
+        message: `Review with id ${id} successfully deleted`,
+        review: deletedReview,
+      });
     } else {
-      res.status(404).json({ message: `Review with id ${id} not found` });
+      res.status(404).json({
+        message: `Review with id ${id} not found`,
+      });
     }
   } catch (error) {
     next(error);
@@ -69,21 +82,22 @@ router.delete("/:id", auth, async (req, res, next) => {
 router.put("/:id", auth, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { userId, propertyId, rating, comment } = req.body;
-    const review = await updateReviewById(id, {
-      id,
-      userId,
-      propertyId,
+    const { rating, comment, propertyId, userId } = req.body;
+    const updatedReview = await updateReviewById(id, {
       rating,
       comment,
+      propertyId,
+      userId,
     });
 
-    if (review) {
-      res
-        .status(200)
-        .send({ message: `Review with id ${id} successfully updated` });
+    if (updatedReview) {
+      res.status(200).send({
+        message: `Review with id ${id} successfully updated`,
+      });
     } else {
-      res.status(404).json({ message: `Review with id ${id} not found` });
+      res.status(404).json({
+        message: `Review with id ${id} not found`,
+      });
     }
   } catch (error) {
     next(error);

@@ -1,12 +1,20 @@
 import { PrismaClient } from "@prisma/client";
 
-const deleteAmenityById = async (id) => {
-  const prisma = new PrismaClient();
-  const amenity = await prisma.amenity.deleteMany({
-    where: { id },
-  });
+const prisma = new PrismaClient();
 
-  return amenity.count > 0 ? id : null;
+const deleteAmenityById = async (amenityId) => {
+  try {
+    const amenity = await prisma.amenity.delete({ where: { id: amenityId } });
+    return amenity;
+  } catch (error) {
+    if (error instanceof Error && error.code === "P2025") {
+      return null; 
+    } else {
+      throw new Error(`Error in deleting amenity: ${error.message}`);
+    }
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default deleteAmenityById;

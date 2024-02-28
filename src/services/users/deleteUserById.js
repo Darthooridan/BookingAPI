@@ -1,12 +1,25 @@
 import { PrismaClient } from "@prisma/client";
 
-const deleteUserById = async (id) => {
-  const prisma = new PrismaClient();
-  const user = await prisma.user.deleteMany({
-    where: { id },
-  });
+const prisma = new PrismaClient();
 
-  return user.count > 0 ? id : null;
+const deleteUserById = async (id) => {
+  try {
+    const user = await prisma.user.delete({
+      where: { id },
+    });
+    return user;
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.code === "P2025" 
+    ) {
+      return null; 
+    } else {
+      throw new Error(`Error in deleting user: ${error.message}`);
+    }
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default deleteUserById;

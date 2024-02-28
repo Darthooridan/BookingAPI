@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 
-const createBooking = async (
+const prisma = new PrismaClient();
+
+const createBooking = async ({
   userId,
   propertyId,
   checkinDate,
@@ -8,24 +10,26 @@ const createBooking = async (
   numberOfGuests,
   totalPrice,
   bookingStatus
-) => {
-  const prisma = new PrismaClient();
+}) => {
+  try {
+    const booking = await prisma.booking.create({
+      data: {
+        userId,
+        propertyId,
+        checkinDate,
+        checkoutDate,
+        numberOfGuests,
+        totalPrice,
+        bookingStatus,
+      },
+    });
 
-  const newBooking = {
-    userId,
-    propertyId,
-    checkinDate,
-    checkoutDate,
-    numberOfGuests,
-    totalPrice,
-    bookingStatus,
-  };
-
-  const booking = await prisma.booking.create({
-    data: newBooking,
-  });
-
-  return booking;
+    return booking;
+  } catch (error) {
+    throw new Error(`Error creating booking: ${error.message}`);
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default createBooking;

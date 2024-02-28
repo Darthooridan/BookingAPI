@@ -59,6 +59,18 @@
       "maxGuestCount": 6,
       "hostId": "b5678901-23ef-0123-4567-89abcdef0123",
       "rating": 4
+    },
+        {
+      "id": "m7656789-01f2-3456-789a-bcdef0123786",
+      "title": "Old Town Apartament",
+      "description": "Step back in time and enjoy the simple pleasures of our finest apartament.",
+      "location": "Amsterdam, Netherlands",
+      "pricePerNight": 88.0,
+      "bedroomCount": 2,
+      "bathRoomCount": 1,
+      "maxGuestCount": 4,
+      "hostId": "b5678977-23ef-0123-4567-8nhgef0123",
+      "rating": 4
     }
   ]
 }

@@ -1,10 +1,17 @@
 import { PrismaClient } from "@prisma/client";
 
-const getHosts = async () => {
-  const prisma = new PrismaClient();
-  const hosts = await prisma.host.findMany();
+const prisma = new PrismaClient();
 
-  return hosts;
+const getHosts = async (name) => {
+  try {
+    const hosts = await prisma.host.findMany({
+      where: name ? { name: { contains: name } } : undefined,
+    });
+
+    return hosts;
+  } catch (error) {
+    throw new Error(`Error in getHosts service: ${error.message}`);
+  }
 };
 
 export default getHosts;

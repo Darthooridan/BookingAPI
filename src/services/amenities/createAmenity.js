@@ -1,16 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
+
 const createAmenity = async (name) => {
-  const prisma = new PrismaClient();
-  const newAmenity = {
-    name,
-  };
-
-  const amenity = await prisma.amenity.create({
-    data: newAmenity,
-  });
-
-  return amenity;
+  try {
+    const amenity = await prisma.amenity.create({ data: { name } });
+    return amenity;
+  } catch (error) {
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default createAmenity;

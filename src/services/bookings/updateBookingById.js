@@ -1,28 +1,24 @@
 import { PrismaClient } from "@prisma/client";
 
-const updateBookingById = async (id, updatedBooking) => {
-  const prisma = new PrismaClient();
+const prisma = new PrismaClient();
 
-  const { propertyId, userId, ...rest } = updatedBooking;
+const updateBookingById = async (id, updatedBookingData) => {
+  try {
+    const updatedBooking = await prisma.booking.update({
+      where: { id },
+      data: updatedBookingData,
+    });
 
-  const booking = await prisma.booking.update({
-    where: { id },
-    data: {
-      ...rest,
-      userId: userId
-        ? {
-            connect: { id: userId },
-          }
-        : undefined,
-      properties: propertyId
-        ? {
-            set: propertyId.map((id) => ({ id })),
-          }
-        : undefined,
-    },
-  });
-
-  return booking;
+    return updatedBooking;
+  } catch (error) {
+    if (error instanceof Error && error.code === "P2025") {
+      return null; 
+    } else {
+      throw new Error(`Error in updating booking: ${error.message}`);
+    }
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default updateBookingById;

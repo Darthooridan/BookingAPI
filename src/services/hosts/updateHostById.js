@@ -1,13 +1,26 @@
 import { PrismaClient } from "@prisma/client";
 
-const updateHostById = async (id, updatedHost) => {
-  const prisma = new PrismaClient();
-  const host = await prisma.host.updateMany({
-    where: { id },
-    data: updatedHost,
-  });
+const prisma = new PrismaClient();
 
-  return host.count > 0 ? id : null;
+const updateHostById = async (hostId, updatedData) => {
+  try {
+    const updatedHost = await prisma.host.update({
+      where: { id: hostId },
+      data: updatedData,
+    });
+    return updatedHost;
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.code === "P2025"
+    ) {
+      return null; 
+    } else {
+      throw new Error(`Error in updateHostById service: ${error.message}`);
+    }
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default updateHostById;

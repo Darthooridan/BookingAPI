@@ -10,9 +10,13 @@ const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const properties = await getProperties();
-    res.json(properties);
+    const { location, pricePerNight } = req.query;
+
+    const properties = await getProperties(location, pricePerNight);
+
+    res.status(200).json(properties);
   } catch (error) {
+    console.error("Error in /properties endpoint:", error);
     next(error);
   }
 });
@@ -30,7 +34,24 @@ router.post("/", auth, async (req, res, next) => {
       hostId,
       rating,
     } = req.body;
-    const newProperty = await createProperty(
+
+    const requiredFields = [
+      "title",
+      "description",
+      "location",
+      "pricePerNight",
+      "bedroomCount",
+      "bathRoomCount",
+      "maxGuestCount",
+      "hostId",
+      "rating",
+    ];
+
+    if (requiredFields.some((field) => !req.body[field])) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+
+    const newProperty = await createProperty({
       title,
       description,
       location,
@@ -39,10 +60,18 @@ router.post("/", auth, async (req, res, next) => {
       bathRoomCount,
       maxGuestCount,
       hostId,
-      rating
-    );
-    res.status(201).json(newProperty);
+      rating,
+    });
+
+    res.status(201).json({
+      message: `Property with id ${newProperty.id} successfully added`,
+      property: newProperty,
+    });
   } catch (error) {
+    if (error.message.includes("Null constraint violation")) {
+      return res.status(400).json({ error: "Invalid data provided." });
+    }
+
     next(error);
   }
 });
@@ -65,12 +94,12 @@ router.get("/:id", async (req, res, next) => {
 router.delete("/:id", auth, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const property = await deletePropertyById(id);
+    const deletedProperty = await deletePropertyById(id);
 
-    if (property) {
+    if (deletedProperty) {
       res.status(200).send({
         message: `Property with id ${id} successfully deleted`,
-        property,
+        property: deletedProperty,
       });
     } else {
       res.status(404).json({
@@ -96,7 +125,8 @@ router.put("/:id", auth, async (req, res, next) => {
       hostId,
       rating,
     } = req.body;
-    const property = await updatePropertyById(id, {
+
+    const updatedProperty = await updatePropertyById(id, {
       title,
       description,
       location,
@@ -107,8 +137,7 @@ router.put("/:id", auth, async (req, res, next) => {
       hostId,
       rating,
     });
-
-    if (property) {
+    if (updatedProperty) {
       res.status(200).send({
         message: `Property with id ${id} successfully updated`,
       });
@@ -122,4 +151,4 @@ router.put("/:id", auth, async (req, res, next) => {
   }
 });
 
-export default router;
+export default router; 
